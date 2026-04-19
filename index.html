@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Автоматизация — Строительство и Аренда</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f4f0; color: #1a1a18; }
+
+.header { background: #1a1a18; color: #f5f4f0; padding: 28px 32px; }
+.header h1 { font-size: 22px; font-weight: 500; margin-bottom: 6px; }
+.header p { font-size: 14px; color: #888; }
+
+.tabs { display: flex; background: #1a1a18; padding: 0 32px; gap: 4px; overflow-x: auto; }
+.tab { padding: 10px 20px; font-size: 13px; font-weight: 500; cursor: pointer; color: #888; border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap; }
+.tab.active { color: #f5f4f0; border-bottom-color: #6b8f5e; }
+.tab:hover { color: #ccc; }
+
+.content { padding: 24px 32px; max-width: 960px; }
+
+.section { display: none; }
+.section.active { display: block; }
+
+.section-intro { background: #fff; border: 0.5px solid #ddd; border-radius: 12px; padding: 18px 20px; margin-bottom: 20px; }
+.section-intro p { font-size: 14px; color: #555; line-height: 1.6; }
+
+.phase-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #aaa; margin: 24px 0 10px; padding-left: 4px; }
+
+.flow-card { background: #fff; border: 0.5px solid #ddd; border-radius: 12px; margin-bottom: 12px; overflow: hidden; cursor: pointer; transition: box-shadow 0.2s; }
+.flow-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.flow-card.new-idea { border-left: 3px solid #6b8f5e; }
+
+.flow-header { display: flex; align-items: center; padding: 16px 20px; gap: 14px; }
+.flow-num { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.num-pm   { background: #ede8f5; color: #4a2d8e; }
+.num-build { background: #e8f0e4; color: #3d6b2f; }
+.num-rent  { background: #e4ecf5; color: #2f4d6b; }
+
+.flow-title-block { flex: 1; }
+.flow-title { font-size: 15px; font-weight: 500; margin-bottom: 3px; }
+.flow-subtitle { font-size: 12px; color: #888; }
+
+.flow-badges { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+.badge { font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 500; }
+.badge-auto { background: #fff3e0; color: #8b5000; }
+.badge-ai   { background: #f3e8ff; color: #5b2d8e; }
+.badge-both { background: #e8f5e4; color: #2d6b2f; }
+.badge-new  { background: #1a1a18; color: #f5f4f0; font-size: 10px; padding: 2px 7px; }
+
+.flow-chevron { color: #bbb; font-size: 16px; transition: transform 0.2s; margin-left: 6px; flex-shrink: 0; }
+.flow-card.open .flow-chevron { transform: rotate(180deg); }
+
+.flow-body { display: none; border-top: 0.5px solid #eee; }
+.flow-card.open .flow-body { display: block; }
+.flow-body-inner { padding: 20px; }
+
+.steps-label { font-size: 11px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+
+.steps { display: flex; flex-direction: column; }
+.step { display: flex; gap: 12px; align-items: flex-start; position: relative; }
+.step:not(:last-child)::after { content: ‘’; position: absolute; left: 13px; top: 28px; width: 1px; height: calc(100% + 2px); background: #e8e8e8; }
+.step-dot { width: 27px; height: 27px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; margin-top: 2px; position: relative; z-index: 1; }
+.dot-trigger { background: #fff3e0; }
+.dot-auto   { background: #e8f0ff; }
+.dot-ai     { background: #f3e8ff; }
+.dot-human  { background: #e8f5e4; }
+.dot-out    { background: #f0f0f0; }
+
+.step-content { padding: 3px 0 14px; flex: 1; }
+.step-type { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: #bbb; margin-bottom: 2px; }
+.step-text { font-size: 14px; color: #222; line-height: 1.5; }
+.step-detail { font-size: 12px; color: #999; margin-top: 4px; line-height: 1.5; }
+
+.meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 18px; }
+.meta-box { background: #f8f8f6; border-radius: 8px; padding: 12px 14px; }
+.meta-label { font-size: 11px; color: #999; margin-bottom: 4px; font-weight: 500; }
+.meta-value { font-size: 13px; font-weight: 600; color: #222; line-height: 1.4; }
+.meta-value.green  { color: #2d6b2f; }
+.meta-value.purple { color: #5b2d8e; }
+.meta-value.orange { color: #8b5000; }
+
+.roi-bar { margin-top: 14px; }
+.roi-label { font-size: 11px; color: #aaa; margin-bottom: 5px; }
+.roi-track { background: #eee; border-radius: 4px; height: 5px; }
+.roi-fill { height: 5px; border-radius: 4px; background: #4a7a3d; }
+</style>
+
+</head>
+<body>
+
+<div class="header">
+  <h1>AI-автоматизация: строительство и управление недвижимостью</h1>
+  <p>Флоу для менеджера проектов, стройки и управления арендой</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showSection('pm', this)">📋 Управление проектом</div>
+  <div class="tab" onclick="showSection('build', this)">🏗️ Строительство</div>
+  <div class="tab" onclick="showSection('rent', this)">🏠 Аренда</div>
+</div>
+
+<div class="content">
+
+<!-- ======================== УПРАВЛЕНИЕ ПРОЕКТОМ ======================== -->
+
+<div class="section active" id="pm">
+
+  <div class="section-intro">
+    <p>Флоу для менеджера проектов (Менеджер проекта): работа с Revit, прорабами, подрядчиками и заказчиком. Охватывает весь цикл — от чертежей до сдачи объекта и гарантийного периода.</p>
+  </div>
+
+  <div class="phase-label">Фаза A — Подготовка (до стройки)</div>
+
+  <!-- ПМ 1 -->
+
+  <div class="flow-card new-idea" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-pm">1</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Подготовка к зуму — автоповестка из чертежей</div>
+        <div class="flow-subtitle">Revit → AI находит несоответствия → готовая повестка для звонка</div>
+      </div>
+      <div class="flow-badges">
+        <span class="badge badge-ai">AI</span>
+        <span class="badge badge-new">Новое</span>
+      </div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">📐</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Загружаются чертежи из Revit (PDF-экспорт или через API)</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI-агент</div>
+            <div class="step-text">Анализирует документацию: ищет несоответствия, незаполненные спецификации, конфликтующие размеры</div>
+            <div class="step-detail">Пример: "Стена в секции B — 2мм, стандарт — 4мм. Нет спецификации на окна. Пересечение воздуховода и балки в оси C-5"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Автоматизация</div>
+            <div class="step-text">За час до зума Менеджер проекта получает готовую повестку: список вопросов по приоритету</div>
+            <div class="step-detail">Вопросы сгруппированы по разделам: конструктив, MEP, отделка</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-out">✅</div>
+          <div class="step-content">
+            <div class="step-type">Результат</div>
+            <div class="step-text">Зум проходит структурировано, ничего не забыто, решения фиксируются сразу</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Экономия</div><div class="meta-value green">1 ч подготовки на каждый звонок</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">Ничего не проходит мимо до начала стройки</div></div>
+      </div>
+      <div class="roi-bar"><div class="roi-label">Потенциал ценности</div><div class="roi-track"><div class="roi-fill" style="width:88%"></div></div></div>
+    </div></div>
+  </div>
+
+  <!-- ПМ 2 -->
+
+  <div class="flow-card" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-pm">2</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Умный зум — задачи и решения автоматически</div>
+        <div class="flow-subtitle">Запись звонка → транскрипт → задачи → все получают итог</div>
+      </div>
+      <div class="flow-badges"><span class="badge badge-both">Авто + AI</span></div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">🎙️</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Зум-звонок заканчивается — запись автоматически скачивается</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI — транскрипция</div>
+            <div class="step-text">Речь преобразуется в текст с разделением по спикерам и временными метками</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI — извлечение</div>
+            <div class="step-text">Из транскрипта извлекаются: решения, задачи с ответственными, технические несоответствия, вопросы без ответа</div>
+            <div class="step-detail">Пример: "Решено: толщина стены B → 4мм. Задача: Менеджер проекта проверяет чертёж до пятницы. Открыто: кто делает спецификацию окон?"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Автоматизация</div>
+            <div class="step-text">Итоги уходят всем участникам в мессенджер. Задачи создаются автоматически с дедлайнами</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-out">🔍</div>
+          <div class="step-content">
+            <div class="step-type">Поиск (в любой момент)</div>
+            <div class="step-text">Менеджер проекта пишет боту: "что решили по стенам?" — AI ищет по всем записям и отвечает с датой и цитатой</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Экономия</div><div class="meta-value green">2–3 ч на каждую встречу</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">Решения не теряются, все в курсе без пересказа</div></div>
+      </div>
+      <div class="roi-bar"><div class="roi-label">Потенциал ценности</div><div class="roi-track"><div class="roi-fill" style="width:95%"></div></div></div>
+    </div></div>
+  </div>
+
+  <!-- ПМ 3 -->
+
+  <div class="flow-card" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-pm">3</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Контроль сметы — Менеджер проекта всегда в курсе</div>
+        <div class="flow-subtitle">Прораб загружает смету → AI резюмирует → Менеджер проекта подтверждает просмотр</div>
+      </div>
+      <div class="flow-badges"><span class="badge badge-ai">AI</span></div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">📄</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Прораб загружает смету в бот (PDF или Excel)</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI-агент</div>
+            <div class="step-text">Извлекает ключевые данные: итоговая сумма, количество этапов, срок, крупнейшие позиции</div>
+            <div class="step-detail">Пример: "Смета €85к. 12 этапов. Срок 4 мес. Топ позиции: сантехника €18к, электрика €14к, отделка €22к"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-human">✅</div>
+          <div class="step-content">
+            <div class="step-type">Менеджер проекта</div>
+            <div class="step-text">Получает резюме в мессенджер — один клик "Видел" или "Есть вопрос"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-out">📁</div>
+          <div class="step-content">
+            <div class="step-type">Результат</div>
+            <div class="step-text">Все сметы хранятся в архиве с историей версий. Заказчик видит только финальную</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Экономия</div><div class="meta-value green">Нет риска информационного разрыва</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">Менеджер проекта всегда знает что ушло заказчику</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="phase-label">Фаза B — Активная стройка</div>
+
+  <!-- ПМ 4 -->
+
+  <div class="flow-card" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-pm">4</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Акт выполненных работ через бота</div>
+        <div class="flow-subtitle">Прораб заполняет в мессенджере → PDF-акт генерируется автоматически</div>
+      </div>
+      <div class="flow-badges"><span class="badge badge-both">Авто + AI</span></div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">💬</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Прораб пишет боту: "Этап: сантехника. Выполнено: 100%. Замечания: нет. Фото прилагаю"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Автоматизация</div>
+            <div class="step-text">Система автоматически генерирует PDF-акт в нужном формате с датой, объектом, этапом и подписями</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-human">✅</div>
+          <div class="step-content">
+            <div class="step-type">Менеджер проекта</div>
+            <div class="step-text">Получает акт на проверку — один клик "Подтвердить" или "Вернуть на доработку"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-out">📊</div>
+          <div class="step-content">
+            <div class="step-type">Результат</div>
+            <div class="step-text">Акт подписан, сохранён в архив, статус этапа обновлён в общем дашборде проекта</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Экономия</div><div class="meta-value green">1–2 ч на каждый акт</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">Нет Excel, нет PDF вручную, нет потери версий</div></div>
+      </div>
+      <div class="roi-bar"><div class="roi-label">Потенциал ценности</div><div class="roi-track"><div class="roi-fill" style="width:85%"></div></div></div>
+    </div></div>
+  </div>
+
+  <!-- ПМ 5 -->
+
+  <div class="flow-card new-idea" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-pm">5</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Предсказание задержек и пересчёт сроков</div>
+        <div class="flow-subtitle">Этап закрыт позже плана → AI пересчитывает весь график → предупреждает</div>
+      </div>
+      <div class="flow-badges">
+        <span class="badge badge-ai">AI</span>
+        <span class="badge badge-new">Новое</span>
+      </div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">⏱️</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Акт этапа подписан с задержкой (или не подписан в плановую дату)</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI-агент</div>
+            <div class="step-text">Пересчитывает все зависимые этапы с учётом задержки. Определяет критический путь</div>
+            <div class="step-detail">Пример: "Сантехника задержалась на 5 дней. Это сдвигает электрику и отделку. Итог: финал сдвигается на 3 недели"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI — предложение</div>
+            <div class="step-text">Предлагает варианты наверстать: где можно параллелить работы, где увеличить бригаду</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-human">📱</div>
+          <div class="step-content">
+            <div class="step-type">Менеджер проекта + Заказчик</div>
+            <div class="step-text">Менеджер проекта получает предупреждение. При необходимости — автоматическое уведомление заказчику с обновлённым сроком</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value green">Узнаёте о срыве за 3–4 недели, а не в день сдачи</div></div>
+        <div class="meta-box"><div class="meta-label">Ценность</div><div class="meta-value purple">Стоимость одного срыва срока >> стоимость автоматизации</div></div>
+      </div>
+      <div class="roi-bar"><div class="roi-label">Потенциал ценности</div><div class="roi-track"><div class="roi-fill" style="width:92%"></div></div></div>
+    </div></div>
+  </div>
+
+  <div class="phase-label">Фаза C — Параллельные подрядчики</div>
+
+  <!-- ПМ 6 -->
+
+  <div class="flow-card" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-pm">6</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Координация правок от смежных подрядчиков</div>
+        <div class="flow-subtitle">Подрядчик сообщает о пересечении → тикет → ответственный → новые чертежи</div>
+      </div>
+      <div class="flow-badges"><span class="badge badge-both">Авто + AI</span></div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">⚠️</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Подрядчик (кондиционерщик, оконщик) пишет в общий чат: "Пересечение: воздуховод и балка, ось B-4"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI-агент</div>
+            <div class="step-text">Создаёт тикет: описание, фото, ось/секция, назначает ответственного проектировщика</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Автоматизация</div>
+            <div class="step-text">Если нет ответа 48 часов — автоматическое напоминание. Менеджер проекта видит все открытые тикеты на дашборде</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-out">📐</div>
+          <div class="step-content">
+            <div class="step-type">Закрытие тикета</div>
+            <div class="step-text">При закрытии: система запрашивает обновлённый PDF чертежа, версионирует и рассылает всем затронутым подрядчикам</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Экономия</div><div class="meta-value green">Часы переписки → минуты</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">Ничего не теряется в чатах, все видят актуальные чертежи</div></div>
+      </div>
+      <div class="roi-bar"><div class="roi-label">Потенциал ценности</div><div class="roi-track"><div class="roi-fill" style="width:88%"></div></div></div>
+    </div></div>
+  </div>
+
+  <!-- ПМ 7 -->
+
+  <div class="flow-card" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-pm">7</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Поиск по переписке и архиву проекта</div>
+        <div class="flow-subtitle">Вопрос боту → AI ищет по всем чатам и документам → отвечает с ссылкой</div>
+      </div>
+      <div class="flow-badges"><span class="badge badge-ai">AI</span></div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Постоянно (фоново)</div>
+            <div class="step-text">Все сообщения из рабочих чатов, документы, акты, зум-транскрипты сохраняются в единую базу знаний проекта</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-trigger">💬</div>
+          <div class="step-content">
+            <div class="step-type">Запрос</div>
+            <div class="step-text">Менеджер проекта пишет боту: "что решили по сантехнике на прошлой неделе?" или "кто отвечает за окна?"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI — семантический поиск</div>
+            <div class="step-text">Ищет по смыслу, не по ключевым словам. Находит даже если написано по-другому</div>
+            <div class="step-detail">Пример ответа: "15 апреля прораб написал: сантехнику начинаем 20-го, Иван ответственный"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-out">🔗</div>
+          <div class="step-content">
+            <div class="step-type">Результат</div>
+            <div class="step-text">Ответ с датой, автором и ссылкой на оригинальное сообщение или документ</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Экономия</div><div class="meta-value green">30–60 мин в день на поиск информации</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">Вся история проекта доступна за секунды</div></div>
+      </div>
+      <div class="roi-bar"><div class="roi-label">Потенциал ценности</div><div class="roi-track"><div class="roi-fill" style="width:90%"></div></div></div>
+    </div></div>
+  </div>
+
+  <div class="phase-label">Коммуникация с заказчиком</div>
+
+  <!-- ПМ 8 -->
+
+  <div class="flow-card new-idea" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-pm">8</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Автоматический еженедельный отчёт заказчику</div>
+        <div class="flow-subtitle">Каждую пятницу → AI собирает данные → красивый отчёт → Менеджер проекта одобряет → уходит заказчику</div>
+      </div>
+      <div class="flow-badges">
+        <span class="badge badge-both">Авто + AI</span>
+        <span class="badge badge-new">Новое</span>
+      </div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">📅</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Каждую пятницу в 16:00 — автоматически</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Автоматизация</div>
+            <div class="step-text">Собирает данные за неделю: выполненные этапы, закрытые тикеты, актуальный срок сдачи, фото с объекта</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI-агент</div>
+            <div class="step-text">Формирует читаемый отчёт для заказчика: что сделано, что следующее, всё ли в плане</div>
+            <div class="step-detail">"✅ Сантехника — завершена. 🔄 Электрика — 60%, завершение 5 мая. 📅 Итоговый срок сдачи: без изменений"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-human">✅</div>
+          <div class="step-content">
+            <div class="step-type">Менеджер проекта</div>
+            <div class="step-text">Получает черновик → один клик "Отправить" или правка за 2 минуты</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-out">📨</div>
+          <div class="step-content">
+            <div class="step-type">Результат</div>
+            <div class="step-text">Заказчик получает отчёт — больше не звонит "ну как там?" каждые 2 дня</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Экономия</div><div class="meta-value green">2–3 ч/неделю на коммуникацию с заказчиком</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">Заказчик доволен и не беспокоит по мелочам</div></div>
+      </div>
+      <div class="roi-bar"><div class="roi-label">Потенциал ценности</div><div class="roi-track"><div class="roi-fill" style="width:80%"></div></div></div>
+    </div></div>
+  </div>
+
+  <div class="phase-label">После сдачи объекта</div>
+
+  <!-- ПМ 9 -->
+
+  <div class="flow-card new-idea" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-pm">9</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Умный архив документов — автоматическая сортировка</div>
+        <div class="flow-subtitle">Любой документ в чат → AI определяет тип → кладёт в нужную папку с версией</div>
+      </div>
+      <div class="flow-badges">
+        <span class="badge badge-ai">AI</span>
+        <span class="badge badge-new">Новое</span>
+      </div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">📎</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Любой PDF или файл отправляется в рабочий чат проекта</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI-агент</div>
+            <div class="step-text">Определяет тип документа: чертёж / акт / смета / договор / переписка с подрядчиком</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Автоматизация</div>
+            <div class="step-text">Переименовывает по стандарту, кладёт в нужную папку, присваивает версию</div>
+            <div class="step-detail">Пример: "Чертёж_СекцияB_Электрика_v3_15апр.pdf" → папка /Чертежи/Электрика/</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-out">🔔</div>
+          <div class="step-content">
+            <div class="step-type">Уведомление</div>
+            <div class="step-text">Если это обновление — уведомляет всех кто работал с предыдущей версией: "Обновлён чертёж секции B (v3)"</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Экономия</div><div class="meta-value green">30 мин/день на разбор документов</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">Все работают с актуальной версией, нет путаницы</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ПМ 10 -->
+
+  <div class="flow-card new-idea" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-pm">10</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Гарантийный период — учёт дефектов</div>
+        <div class="flow-subtitle">Жилец сообщает о дефекте → AI определяет ответственного → контролирует устранение</div>
+      </div>
+      <div class="flow-badges">
+        <span class="badge badge-both">Авто + AI</span>
+        <span class="badge badge-new">Новое</span>
+      </div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">📸</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Заказчик или жилец пишет в бот: "трещина на стене кухни" + фото</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI-агент</div>
+            <div class="step-text">Определяет: чья зона ответственности (прораб / конкретный субподрядчик / поставщик материала)</div>
+            <div class="step-detail">Привязывает к конкретному акту выполненных работ и исполнителю этого этапа</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Автоматизация</div>
+            <div class="step-text">Уведомляет ответственного с дедлайном устранения. Если нет ответа — эскалация Менеджеру проекта</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-out">📋</div>
+          <div class="step-content">
+            <div class="step-type">Результат</div>
+            <div class="step-text">Все дефекты по объекту в одном месте. История: кто, что, когда устранил. Входит в рейтинг подрядчика</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value green">Юридическая защита — всё задокументировано</div></div>
+        <div class="meta-box"><div class="meta-label">Доп. польза</div><div class="meta-value purple">Рейтинг подрядчиков растёт автоматически</div></div>
+      </div>
+      <div class="roi-bar"><div class="roi-label">Потенциал ценности</div><div class="roi-track"><div class="roi-fill" style="width:85%"></div></div></div>
+    </div></div>
+  </div>
+
+  <!-- ПМ 11 -->
+
+  <div class="flow-card new-idea" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-pm">11</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Рейтинг подрядчиков — память компании</div>
+        <div class="flow-subtitle">После каждого проекта → AI анализирует → скоринг → кого звать в следующий раз</div>
+      </div>
+      <div class="flow-badges">
+        <span class="badge badge-ai">AI</span>
+        <span class="badge badge-new">Новое</span>
+      </div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">🏁</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Этап или проект завершён</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI-агент</div>
+            <div class="step-text">Анализирует по каждому подрядчику: соблюдение сроков, количество правок, дефекты в гарантийный период, скорость реакции</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Автоматизация</div>
+            <div class="step-text">Обновляет карточку подрядчика: рейтинг, история объектов, сильные и слабые стороны</div>
+            <div class="step-detail">Пример: "Иванов Сантехника — 4.2/5. Сроки: +5 дней avg. Дефекты: 0. Рекомендован для следующего проекта"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-out">📱</div>
+          <div class="step-content">
+            <div class="step-type">Следующий проект</div>
+            <div class="step-text">При планировании нового объекта Менеджер проекта спрашивает бота: "кого позвать для сантехники?" — получает топ-3 с историей</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value green">Знания о подрядчиках не уходят с сотрудником</div></div>
+        <div class="meta-box"><div class="meta-label">Доп. польза</div><div class="meta-value purple">Экономия на плохих подрядчиках с каждым проектом</div></div>
+      </div>
+      <div class="roi-bar"><div class="roi-label">Потенциал ценности</div><div class="roi-track"><div class="roi-fill" style="width:78%"></div></div></div>
+    </div></div>
+  </div>
+
+</div>
+
+<!-- ======================== СТРОИТЕЛЬСТВО ======================== -->
+
+<div class="section" id="build">
+
+  <div class="section-intro">
+    <p>Автоматизация процессов на стройплощадке: контроль подрядчиков, прогресс, документы, счета и ежедневный мониторинг всех объектов.</p>
+  </div>
+
+  <div class="phase-label">Контроль подрядчиков</div>
+
+  <div class="flow-card" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-build">1</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Ежедневные отчёты подрядчиков с AI-анализом</div>
+        <div class="flow-subtitle">Подрядчик отправляет отчёт → AI сравнивает с планом → флаги и письма</div>
+      </div>
+      <div class="flow-badges"><span class="badge badge-both">Авто + AI</span></div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">📥</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Подрядчик заполняет форму или присылает фото/текст в мессенджер: что сделано, сколько людей, проблемы</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Автоматизация</div>
+            <div class="step-text">Сохраняет в базу, привязывает к объекту и дате автоматически</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI-агент</div>
+            <div class="step-text">Сравнивает с плановым графиком: выявляет отставание, несоответствие объёмов, пропущенные пункты</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI — черновик письма</div>
+            <div class="step-text">При отклонении — готовит письмо подрядчику с конкретными замечаниями</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-human">✅</div>
+          <div class="step-content">
+            <div class="step-type">Менеджер</div>
+            <div class="step-text">Получает флаг в мессенджер с черновиком. Один клик — одобрить или скорректировать</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Экономия</div><div class="meta-value green">3–4 ч/день → 20 мин</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">Ничего не проходит мимо, всё задокументировано</div></div>
+      </div>
+      <div class="roi-bar"><div class="roi-label">Потенциал ценности</div><div class="roi-track"><div class="roi-fill" style="width:82%"></div></div></div>
+    </div></div>
+  </div>
+
+  <div class="phase-label">Прогресс и документы</div>
+
+  <div class="flow-card" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-build">2</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Прогресс стройки через фото с телефона</div>
+        <div class="flow-subtitle">Прораб фоткает → AI Vision анализирует → таблица прогресса → отчёт владельцу</div>
+      </div>
+      <div class="flow-badges"><span class="badge badge-ai">AI Vision</span></div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">📸</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Прораб присылает фото в рабочий чат с тегом объекта и этапа</div>
+            <div class="step-detail">Формат: "#объект_Б #фундамент" + фото. Можно без тегов — AI разберётся</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI Vision</div>
+            <div class="step-text">Анализирует фото: определяет этап строительства, % готовности, видимые нарушения или отклонения</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Автоматизация</div>
+            <div class="step-text">Записывает в базу: объект, дата, этап, % готовности, флаги проблем. Без ручного ввода</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-out">📊</div>
+          <div class="step-content">
+            <div class="step-type">Еженедельно</div>
+            <div class="step-text">PDF-отчёт по всем объектам с фото и прогрессом уходит владельцу автоматически</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value green">Без enterprise-систем, прораб просто фоткает</div></div>
+        <div class="meta-box"><div class="meta-label">Охват</div><div class="meta-value purple">Все объекты в реальном времени</div></div>
+      </div>
+      <div class="roi-bar"><div class="roi-label">Потенциал ценности</div><div class="roi-track"><div class="roi-fill" style="width:90%"></div></div></div>
+    </div></div>
+  </div>
+
+  <div class="flow-card" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-build">3</div>
+      <div class="flow-title-block">
+        <div class="flow-title">AI-разбор контрактов и документов</div>
+        <div class="flow-subtitle">Контракт загружается → AI извлекает сроки, суммы, штрафы → дедлайны в календарь</div>
+      </div>
+      <div class="flow-badges"><span class="badge badge-ai">AI</span></div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">📄</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Новый контракт загружается в систему или отправляется боту</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI-агент</div>
+            <div class="step-text">Извлекает: стороны, суммы по этапам, сроки, штрафные санкции, гарантийные обязательства</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Автоматизация</div>
+            <div class="step-text">Создаёт карточку контракта в базе + дедлайны в календарь с напоминаниями за 30/7/1 день</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Экономия</div><div class="meta-value green">2–3 ч на каждый контракт</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">Ни один дедлайн не пропускается</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="flow-card" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-build">4</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Проверка счетов подрядчика</div>
+        <div class="flow-subtitle">Счёт → AI сверяет с контрактом и прогрессом → Одобрить / Запросить / Отклонить</div>
+      </div>
+      <div class="flow-badges"><span class="badge badge-both">Авто + AI</span></div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">📬</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Подрядчик присылает счёт на email или загружает в бот</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI-агент</div>
+            <div class="step-text">Сравнивает: сумма счёта = сумма по этапу в контракте? Этап подтверждён в актах?</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-human">✅</div>
+          <div class="step-content">
+            <div class="step-type">Менеджер</div>
+            <div class="step-text">Карточка в мессенджере: счёт + контракт + статус прогресса + рекомендация AI. Три кнопки: Одобрить / Запросить / Отклонить</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value green">Нет переплат за невыполненные работы</div></div>
+        <div class="meta-box"><div class="meta-label">Доп. польза</div><div class="meta-value purple">Автоответ подрядчику, запись в журнал</div></div>
+      </div>
+      <div class="roi-bar"><div class="roi-label">Потенциал ценности</div><div class="roi-track"><div class="roi-fill" style="width:88%"></div></div></div>
+    </div></div>
+  </div>
+
+  <div class="phase-label">Мониторинг портфеля</div>
+
+  <div class="flow-card" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-build">5</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Утренний дайджест по всем объектам</div>
+        <div class="flow-subtitle">Каждое утро в 8:00 → сводка по всем стройкам → в мессенджер владельцу</div>
+      </div>
+      <div class="flow-badges"><span class="badge badge-both">Авто + AI</span></div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">⏰</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Каждый день в 8:00 — по расписанию</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Автоматизация</div>
+            <div class="step-text">Собирает данные: вчерашние отчёты, статус задач, просроченные счета, новые дефекты по всем объектам</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI-агент</div>
+            <div class="step-text">Формирует читаемый текст: что норма, что требует внимания, что критично</div>
+            <div class="step-detail">"✅ Объект А — в плане. ⚠️ Объект Б — задержка кровли 3 дня. 🔴 Объект В — неоплаченный счёт"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-out">📱</div>
+          <div class="step-content">
+            <div class="step-type">Результат</div>
+            <div class="step-text">30 секунд чтения вместо часа созвонов</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Экономия</div><div class="meta-value green">1–2 ч созвонов в день</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">Владелец всегда в курсе без звонков</div></div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+<!-- ======================== АРЕНДА ======================== -->
+
+<div class="section" id="rent">
+
+  <div class="section-intro">
+    <p>Автоматизация жизненного цикла арендатора: от заезда до выезда, техобслуживание, коммуникации и ежемесячная отчётность по портфелю.</p>
+  </div>
+
+  <div class="phase-label">Заезд и выезд</div>
+
+  <div class="flow-card" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-rent">1</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Заезд и выезд арендатора — полный цикл</div>
+        <div class="flow-subtitle">Код замка → заезд → клининг → AI проверка → новый код</div>
+      </div>
+      <div class="flow-badges"><span class="badge badge-both">Авто + AI Vision</span></div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">За 24ч до заезда</div>
+            <div class="step-text">Арендатор получает инструкцию + уникальный код замка + как добраться</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Фиксация заезда</div>
+            <div class="step-text">Умный замок фиксирует открытие → уведомление: "Арендатор заехал в 14:23"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Выезд</div>
+            <div class="step-text">Код деактивируется автоматически → уведомление клинингу: "Квартира освободилась, уборка до 16:00"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI Vision — проверка уборки</div>
+            <div class="step-text">Клинер присылает фото → AI проверяет качество. Если OK — подтверждение и оплата. Если проблема — фото менеджеру</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-out">🔑</div>
+          <div class="step-content">
+            <div class="step-type">Результат</div>
+            <div class="step-text">Новый код для следующего арендатора. Весь цикл — без участия менеджера</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Участие менеджера</div><div class="meta-value green">0% в штатной ситуации</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">Работает ночью, в выходные, в любой стране</div></div>
+      </div>
+      <div class="roi-bar"><div class="roi-label">Потенциал ценности</div><div class="roi-track"><div class="roi-fill" style="width:95%"></div></div></div>
+    </div></div>
+  </div>
+
+  <div class="phase-label">Во время аренды</div>
+
+  <div class="flow-card" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-rent">2</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Заявка на ремонт — полный цикл</div>
+        <div class="flow-subtitle">Арендатор пишет → AI классифицирует → мастер → фото → закрытие</div>
+      </div>
+      <div class="flow-badges"><span class="badge badge-both">Авто + AI</span></div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">💬</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Арендатор пишет в мессенджер на любом языке: "Не работает кран на кухне"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI-агент</div>
+            <div class="step-text">Классифицирует: тип работ (сантехника/электрика/замок), срочность. Уточняет детали если нужно</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Автоматизация</div>
+            <div class="step-text">Срочное → сразу мастеру. Плановое → слот в расписании. Арендатору: "Мастер придёт в среду 14:00"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">После ремонта</div>
+            <div class="step-text">Мастер присылает фото → AI проверяет → закрывает тикет, списывает стоимость, запрашивает оценку от арендатора</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Автоматизировано</div><div class="meta-value green">80% без участия менеджера</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">Арендаторы довольны, история по объекту копится</div></div>
+      </div>
+      <div class="roi-bar"><div class="roi-label">Потенциал ценности</div><div class="roi-track"><div class="roi-fill" style="width:92%"></div></div></div>
+    </div></div>
+  </div>
+
+  <div class="flow-card" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-rent">3</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Мультиязычный чат с арендатором 24/7</div>
+        <div class="flow-subtitle">Любой язык → AI отвечает мгновенно → сложное → эскалация менеджеру</div>
+      </div>
+      <div class="flow-badges"><span class="badge badge-ai">AI</span></div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">💬</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">Арендатор пишет на любом языке — немецком, испанском, русском, французском...</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI с базой знаний</div>
+            <div class="step-text">Отвечает на том же языке. База: правила дома, контакты, оплата, парковка, мусор, шум</div>
+            <div class="step-detail">Стандартные вопросы закрывает мгновенно и точно</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-human">👤</div>
+          <div class="step-content">
+            <div class="step-type">Сложные вопросы</div>
+            <div class="step-text">Если нужно решение менеджера — AI пишет резюме разговора и передаёт. Менеджер не читает всю переписку, только суть</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Охват</div><div class="meta-value green">70–80% запросов без менеджера</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">24/7 на любом языке, ноль задержек</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="flow-card" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-rent">4</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Напоминания об оплате аренды</div>
+        <div class="flow-subtitle">Чистая автоматизация: дата → условие → сообщение → эскалация</div>
+      </div>
+      <div class="flow-badges"><span class="badge badge-auto">Автоматизация</span></div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">День −5</div>
+            <div class="step-text">Дружелюбное напоминание: "Привет! Аренда €1200 — 1-го числа. Реквизиты: ..."</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">День 0 — проверка</div>
+            <div class="step-text">Система проверяет статус оплаты. Если оплачено — ничего. Если нет — ждёт до вечера</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">День +3</div>
+            <div class="step-text">Нейтральный тон: "Видим, что оплата ещё не поступила. Всё ли в порядке?"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-human">⚠️</div>
+          <div class="step-content">
+            <div class="step-type">День +7 — эскалация</div>
+            <div class="step-text">Менеджер получает уведомление. Официальное напоминание уходит автоматически</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">AI нужен?</div><div class="meta-value orange">Нет — чистая логика</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">Работает без менеджера, меньше просрочек</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="phase-label">Портфель и отчётность</div>
+
+  <div class="flow-card" onclick="toggle(this)">
+    <div class="flow-header">
+      <div class="flow-num num-rent">5</div>
+      <div class="flow-title-block">
+        <div class="flow-title">Ежемесячный отчёт по портфелю</div>
+        <div class="flow-subtitle">1-е числа → система собирает данные → AI пишет отчёт → PDF владельцу</div>
+      </div>
+      <div class="flow-badges"><span class="badge badge-both">Авто + AI</span></div>
+      <div class="flow-chevron">▾</div>
+    </div>
+    <div class="flow-body"><div class="flow-body-inner">
+      <div class="steps-label">Как работает</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-dot dot-trigger">📅</div>
+          <div class="step-content">
+            <div class="step-type">Триггер</div>
+            <div class="step-text">1-е число каждого месяца — автоматически</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-auto">⚙️</div>
+          <div class="step-content">
+            <div class="step-type">Автоматизация</div>
+            <div class="step-text">По каждому объекту: оплаты, задолженности, ремонты, расходы, новые договоры, выезды</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-ai">🤖</div>
+          <div class="step-content">
+            <div class="step-type">AI-агент</div>
+            <div class="step-text">Формирует управленческий отчёт с выводами: что хорошо, что требует внимания, аномалии</div>
+            <div class="step-detail">"Объект X: доход €4200, расходы €320. Объект Y: задолженность арендатора 2Б — €800"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-dot dot-out">📨</div>
+          <div class="step-content">
+            <div class="step-type">Результат</div>
+            <div class="step-text">PDF-отчёт на email + краткая версия в мессенджер владельцу</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-box"><div class="meta-label">Экономия</div><div class="meta-value green">4–8 ч сбора данных в месяц</div></div>
+        <div class="meta-box"><div class="meta-label">Главная польза</div><div class="meta-value purple">Полная картина по всем объектам за минуту</div></div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+function toggle(card) {
+  const isOpen = card.classList.contains('open');
+  document.querySelectorAll('.flow-card.open').forEach(c => c.classList.remove('open'));
+  if (!isOpen) card.classList.add('open');
+}
+function showSection(id, tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  tab.classList.add('active');
+}
+</script>
+
+</body>
+</html>
